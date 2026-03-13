@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Altın Günü Kaosu - Fonksiyonel Prototip</title>
+  </head>
+  <body>
+    <!-- The cursor hand icon -->
+    <div id="custom-cursor">🖐️</div>
+    
+    <div id="app">
+      <div id="game-container">
+        
+        <!-- Social/UI Overlay -->
+        <div id="ui-layer">
+          
+          <!-- TOP BAR: 5-Teyze Radar & Gossip UI -->
+          <div id="gossip-radar-container">
+            <!-- Functional Labels -->
+            <div class="hud-top-labels">
+              <div id="reputation-label" class="hud-label">MAHALLE İTİBARI: DÜŞÜK</div>
+              <div id="shockwave-warning" class="hud-label danger hidden">NURAN'IN SOSYAL ŞOKDALGASI: YAKLAŞIYOR</div>
+              <div id="gossip-energy-label" class="hud-label">DEDİKODU ENERJİSİ: %<span id="gossip-energy-val">0</span></div>
+            </div>
+
+            <!-- 5 Teyze Radar Faces -->
+            <div id="teyze-radar">
+              <!-- Dynamically populated in JS, but visualized as 5 slots -->
+              <div class="teyze-slot" id="t-0">
+                <div class="teyze-name">Nuran</div>
+                <div class="teyze-pic">👩</div>
+                <div class="teyze-symbol"></div>
+              </div>
+              <div class="teyze-slot" id="t-1">
+                <div class="teyze-name">Gülümser</div>
+                <div class="teyze-pic">👱‍♀️</div>
+                <div class="teyze-symbol"></div>
+              </div>
+              <div class="teyze-slot" id="t-2">
+                <div class="teyze-name">Saniye</div>
+                <div class="teyze-pic">👵</div>
+                <div class="teyze-symbol"></div>
+              </div>
+              <div class="teyze-slot" id="t-3">
+                <div class="teyze-name">Mukaddes</div>
+                <div class="teyze-pic">🧕</div>
+                <div class="teyze-symbol"></div>
+              </div>
+              <div class="teyze-slot" id="t-4">
+                <div class="teyze-name">Şermin</div>
+                <div class="teyze-pic">👧</div>
+                <div class="teyze-symbol"></div>
+              </div>
+            </div>
+            
+            <!-- Center Prompt (Player Input Area) -->
+            <div id="center-gossip-prompt">
+               <div id="primary-gossip-text">dedikodu bekleniyor...</div>
+               <div class="hint-text">Cevabı doğru teyzeye fırlat!</div>
+            </div>
+          </div>
+          
+          <!-- BOTTOM HUD: Balance state -->
+          <div id="balance-hud">
+             <div id="balance-label" class="hud-label">TABAK DENGESİ: %<span id="balance-val">100</span></div>
+          </div>
+
+          <!-- Screens -->
+          <div id="start-screen" class="overlay-screen active">
+            <h1>Altın Günü Kaosu</h1>
+            <p>Ağırlık merkezini koru, dedikoduları doğru hedefe ateşle!</p>
+            <div class="instructions">
+              <p>🫳 Fareyi sola/sağa hareket ettirerek tabağın ağırlık merkezini (Gizmo) dengele.</p>
+              <p>💬 Ekranda beliren dedikoduyu, üst barda doğru sembolü arayan teyzeye tıklayarak (Sinyal Sende) gönder.</p>
+              <p>🔥 Şiddetli dedikodular tabağa Şok Dalgası vurur, dikkatli ol!</p>
+            </div>
+            <button id="start-btn" class="nuran-btn">Oyuna Başla</button>
+          </div>
+
+          <div id="game-over-screen" class="overlay-screen">
+            <h1>Rezil Oldun!</h1>
+            <p>Denge bozuldu, yiyecekler uçuştu.</p>
+            <p>Topladığın Dedikodu Puanı: <span id="final-score">0</span></p>
+            <button id="restart-btn" class="nuran-btn">Tekrar Dene</button>
+          </div>
+
+          <!-- Container for the visual gossip particles emitted toward the Teyzes -->
+          <div id="gossip-particles-container"></div>
+          
+          <!-- Chaos Overlay (Visual Effect) -->
+          <div id="chaos-overlay">
+            <h2 id="chaos-text">SIFIR YERÇEKİMİ BAŞLADI!</h2>
+          </div>
+        </div>
+        
+        <!-- Game rendering canvas (Physics & Gizmos) -->
+        <canvas id="game-canvas"></canvas>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

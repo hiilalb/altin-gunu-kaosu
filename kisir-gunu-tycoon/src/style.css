@@ -1,0 +1,506 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Outfit:wght@400;600;800&display=swap');
+
+:root {
+  --gold-primary: #D4AF37;
+  --gold-light: #F3E5AB;
+  --gold-dark: #AA6C39;
+  --bg-dark: #2B1810; /* Dark vintage mahogany floor/table */
+  --text-light: #FDFBF7;
+  --danger-red: #d32f2f;
+  --nuran-purple: #4A148C;
+  --bubble-bg: rgba(253, 251, 247, 0.95);
+  --bubble-text: #333;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background-color: #111;
+  color: var(--text-light);
+  overflow: hidden;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: none; /* Custom shaking hand used instead! */
+}
+
+/* Custom shakey hand cursor */
+#custom-cursor {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -10px);
+  font-size: 2.5rem;
+  pointer-events: none;
+  z-index: 1000;
+  filter: drop-shadow(0px 10px 10px rgba(0,0,0,0.5));
+  transition: opacity 0.2s;
+}
+.cursor-shaking {
+  animation: cursorShake 0.1s infinite alternate;
+}
+@keyframes cursorShake {
+  from { transform: translate(calc(-50% - 2px), calc(-10px - 2px)) rotate(-5deg); }
+  to { transform: translate(calc(-50% + 2px), calc(-10px + 2px)) rotate(5deg); }
+}
+
+#app {
+  width: 100%;
+  height: 100%;
+  max-width: 1400px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--bg-dark);
+  
+  /* Spatial Navigation Grid - 3D depth illusion */
+  background-image: 
+    linear-gradient(rgba(212, 175, 55, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(212, 175, 55, 0.1) 1px, transparent 1px);
+  background-size: 80px 80px;
+  background-position: center bottom;
+  box-shadow: inset 0 0 150px rgba(0,0,0,0.95);
+  perspective: 1000px;
+}
+
+#game-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  /* Adds a slight 3D perspective to the container contents */
+  transform-style: preserve-3d;
+}
+
+#game-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1; /* Below UI */
+  display: block;
+}
+
+/* UI Layer overlaying canvas */
+#ui-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: none; /* Let clicks pass through to canvas when needed */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Let specific UI elements handle clicks */
+#ui-layer > * {
+  pointer-events: auto;
+}
+
+/* --- HUD LABELS --- */
+.hud-top-labels {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  width: 100%;
+}
+.hud-label {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: var(--gold-light);
+  background: rgba(0,0,0,0.7);
+  border: 1px solid var(--gold-dark);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  letter-spacing: 2px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+}
+.hud-label.danger {
+  color: var(--text-light);
+  background: rgba(211, 47, 47, 0.8);
+  border-color: #ff5252;
+  animation: warningPulse 1s infinite alternate;
+}
+
+/* --- 5-TEYZE RADAR --- */
+#teyze-radar {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+.teyze-slot {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  background: radial-gradient(circle, #333 0%, #111 100%);
+  border: 3px solid var(--gold-dark);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: none; /* Use custom hand even on hover */
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.6);
+}
+.teyze-slot:hover {
+  transform: scale(1.1);
+  border-color: var(--gold-primary);
+  box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
+}
+.teyze-name {
+  position: absolute;
+  top: -25px;
+  width: 100%;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--gold-light);
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+  pointer-events: none;
+}
+.teyze-pic {
+  font-size: 2.5rem;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+.teyze-symbol {
+  position: absolute;
+  top: -15px;
+  right: -10px;
+  font-size: 1.5rem;
+  background: white;
+  border-radius: 50%;
+  width: 35px; height: 35px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid var(--gold-primary);
+  box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+  animation: floatSmall 2s ease-in-out infinite;
+}
+
+/* --- CENTER GOSSIP PROMPT --- */
+#center-gossip-prompt {
+  margin: 3rem auto 0;
+  max-width: 500px;
+  background: rgba(26, 15, 8, 0.9);
+  border: 2px solid var(--gold-primary);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.8), inset 0 0 30px rgba(212, 175, 55, 0.1);
+  transform: translateY(-20px);
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s;
+}
+#center-gossip-prompt.active {
+  transform: translateY(0);
+  opacity: 1;
+}
+#primary-gossip-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  color: var(--text-light);
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+.hint-text {
+  font-size: 0.9rem;
+  color: var(--gold-dark);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Visual Gossip Particle */
+.gossip-particle {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: radial-gradient(circle, #fff, var(--gold-primary));
+  border-radius: 50%;
+  box-shadow: 0 0 20px var(--gold-primary), 0 0 40px var(--gold-light);
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* Bottom HUD */
+#balance-hud {
+  position: absolute;
+  bottom: 2rem;
+  left: 2rem;
+}
+
+/* Shockwave Visual overlay */
+.shockwave-effect {
+  position: absolute;
+  border-radius: 50%;
+  border: 5px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 50px rgba(212, 175, 55, 0.8), inset 0 0 30px rgba(255,255,255,0.5);
+  transform: scale(0.1);
+  opacity: 1;
+  pointer-events: none;
+  animation: blastRing 0.6s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+  z-index: 50;
+}
+
+/* --- Overlay Screens (Start, Game Over) --- */
+.overlay-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(26, 15, 8, 0.85);
+  backdrop-filter: blur(8px);
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  z-index: 50;
+  padding: 2rem;
+}
+
+#start-screen {
+  background: linear-gradient(rgba(26, 15, 8, 0.8), rgba(26, 15, 8, 0.95)), url('/hero_bg.png');
+  background-size: cover;
+  background-position: center;
+}
+
+.overlay-screen.active {
+  display: flex;
+  animation: fadeIn 0.5s ease;
+}
+
+.overlay-screen h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 4rem;
+  color: var(--gold-primary);
+  margin-bottom: 1rem;
+  text-shadow: 3px 3px 6px rgba(0,0,0,0.9), 0 0 30px rgba(212, 175, 55, 0.8);
+}
+
+.overlay-screen p {
+  font-size: 1.3rem;
+  max-width: 600px;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+}
+
+.instructions {
+  background: rgba(0,0,0,0.6);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px dashed var(--gold-dark);
+  margin-bottom: 3rem;
+  text-align: left;
+  backdrop-filter: blur(4px);
+}
+.instructions p {
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.nuran-btn {
+  background: linear-gradient(135deg, var(--gold-primary) 0%, var(--gold-dark) 100%);
+  color: var(--bg-dark);
+  border: none;
+  padding: 1rem 3rem;
+  font-size: 1.5rem;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #8b5a2b, 0 10px 20px rgba(0,0,0,0.5);
+  transition: all 0.1s;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.nuran-btn:hover {
+  transform: translateY(2px);
+  box-shadow: 0 4px 0 #8b5a2b, 0 8px 15px rgba(0,0,0,0.5);
+  filter: brightness(1.1);
+}
+
+.nuran-btn:active {
+  transform: translateY(6px);
+  box-shadow: 0 0 0 #8b5a2b, 0 2px 5px rgba(0,0,0,0.5);
+}
+
+/* --- Gossip System --- */
+#gossip-container {
+  position: absolute;
+  top: 15%;
+  left: 0;
+  width: 100%;
+  height: 60%;
+  pointer-events: none; /* Container ignores clicks, bubbles catch them */
+}
+
+.gossip-bubble {
+  position: absolute;
+  background: var(--bubble-bg);
+  color: var(--bubble-text);
+  padding: 1rem 1.5rem;
+  border-radius: 20px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  max-width: 250px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  cursor: pointer;
+  pointer-events: auto;
+  border: 2px solid var(--gold-light);
+  transform: scale(0);
+  animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  transition: transform 0.2s, background 0.2s;
+}
+
+/* Tail for speech bubble */
+.gossip-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 10px 10px 0;
+  border-style: solid;
+  border-color: var(--bubble-bg) transparent transparent transparent;
+  display: block;
+  width: 0;
+}
+
+.gossip-bubble:hover {
+  transform: scale(1.05) translateY(-5px);
+  background: #fff;
+  box-shadow: 0 15px 30px rgba(212, 175, 55, 0.4);
+}
+
+.gossip-bubble.correct {
+  background: #d4edda;
+  border-color: #28a745;
+  color: #155724;
+  pointer-events: none;
+}
+.gossip-bubble.custom-tail::after { border-color: inherit transparent transparent transparent !important; }
+
+.gossip-bubble.wrong {
+  background: #f8dbdf;
+  border-color: #dc3545;
+  color: #721c24;
+  pointer-events: none;
+  animation: shakeX 0.5s;
+}
+
+
+/* --- Chaos Mode overlay --- */
+#chaos-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle, transparent 20%, rgba(212, 175, 55, 0.1) 100%);
+  transition: opacity 1s;
+  z-index: 5; /* Above canvas, below screens */
+}
+
+#chaos-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 5rem;
+  color: var(--gold-light);
+  text-shadow: 0 0 30px var(--gold-primary), 0 0 60px var(--gold-dark);
+  transform: scale(0.5);
+  opacity: 0;
+}
+
+/* When chaos mode is active */
+body.chaos-active #chaos-overlay {
+  opacity: 1;
+  animation: chaosPulse 2s infinite alternate;
+}
+
+body.chaos-active #chaos-text {
+  animation: explodeText 3s forwards;
+}
+
+/* --- Animations --- */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes popIn {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes shakeX {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  50% { transform: translateX(10px); }
+  75% { transform: translateX(-10px); }
+}
+
+/* Screen shake for the whole container */
+@keyframes screenShake {
+  0% { transform: translate(1px, 1px) rotate(0deg); }
+  10% { transform: translate(-1px, -2px) rotate(-1deg); }
+  20% { transform: translate(-3px, 0px) rotate(1deg); }
+  30% { transform: translate(3px, 2px) rotate(0deg); }
+  40% { transform: translate(1px, -1px) rotate(1deg); }
+  50% { transform: translate(-1px, 2px) rotate(-1deg); }
+  60% { transform: translate(-3px, 1px) rotate(0deg); }
+  70% { transform: translate(3px, 1px) rotate(-1deg); }
+  80% { transform: translate(-1px, -1px) rotate(1deg); }
+  90% { transform: translate(1px, 2px) rotate(0deg); }
+  100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+
+.screen-shake {
+  animation: screenShake 0.4s;
+}
+
+@keyframes chaosPulse {
+  0% { background: radial-gradient(circle, transparent 20%, rgba(212, 175, 55, 0.05) 100%); }
+  100% { background: radial-gradient(circle, transparent 10%, rgba(212, 175, 55, 0.25) 100%); }
+}
+
+@keyframes warningPulse {
+  0% { transform: scale(1); background: rgba(211, 47, 47, 0.8); }
+  100% { transform: scale(1.05); background: rgba(211, 47, 47, 1); box-shadow: 0 0 20px rgba(211, 47, 47, 0.8); }
+}
+
+@keyframes floatSmall {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes blastRing {
+  0% { transform: scale(0.1); opacity: 1; border-width: 15px; }
+  100% { transform: scale(5); opacity: 0; border-width: 0px; }
+}
+
+/* Utilities */
+.hidden {
+  display: none !important;
+}

@@ -1,0 +1,7 @@
+﻿src/game/Physics.ts(17,5): error TS6133: 'canvasHeight' is declared but its value is never read.
+src/game/SocialSystem.ts(35,10): error TS6133: 'deltaTime' is declared but its value is never read.
+src/game/SocialSystem.ts(91,64): error TS6133: 'options' is declared but its value is never read.
+src/main.ts(3,27): error TS1484: 'FoodType' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/main.ts(5,24): error TS1484: 'GossipOption' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/main.ts(5,24): error TS6133: 'GossipOption' is declared but its value is never read.
+src/main.ts(8,6): error TS1294: This syntax is not allowed when 'erasableSyntaxOnly' is enabled.
