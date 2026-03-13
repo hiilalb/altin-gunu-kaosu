@@ -2,10 +2,10 @@
 import './style.css';
 import { Plate, FoodItem, type FoodType } from './game/Entities';
 import { PhysicsEngine } from './game/Physics';
-import { SocialSystem } from './game/SocialSystem';
+import { SocialSystem, TeyzeData } from './game/SocialSystem';
 
 // Type declarations for the game state
-type GameState = 'START' | 'PLAYING' | 'CHAOS' | 'GAME_OVER';
+type GameState = 'INTRO' | 'START' | 'PLAYING' | 'CHAOS' | 'GAME_OVER';
 
 class Game {
   canvas: HTMLCanvasElement;
@@ -13,7 +13,7 @@ class Game {
   width: number = 0;
   height: number = 0;
   
-  state: GameState = 'START';
+  state: GameState = 'INTRO';
   
   // Systems
   physics: PhysicsEngine;
@@ -37,6 +37,8 @@ class Game {
   foodSpawnTimer: number = 0;
 
   // DOM Elements
+  introScreen: HTMLElement;
+  introCardsContainer: HTMLElement;
   reputationLabel: HTMLElement;
   gossipEnergyLabel: HTMLElement;
   balanceLabel: HTMLElement;
@@ -47,6 +49,9 @@ class Game {
   appContainer: HTMLElement;
   customCursor: HTMLElement;
   
+  // Timeouts for intro
+  introTimeouts: number[] = [];
+
   constructor() {
     this.canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
@@ -57,6 +62,8 @@ class Game {
     this.balanceLabel = document.getElementById('balance-val') as HTMLElement;
     this.shockwaveWarning = document.getElementById('shockwave-warning') as HTMLElement;
     
+    this.introScreen = document.getElementById('intro-screen') as HTMLElement;
+    this.introCardsContainer = document.getElementById('intro-cards-container') as HTMLElement;
     this.startScreen = document.getElementById('start-screen') as HTMLElement;
     this.gameOverScreen = document.getElementById('game-over-screen') as HTMLElement;
     this.finalScoreEl = document.getElementById('final-score') as HTMLElement;
@@ -74,6 +81,9 @@ class Game {
 
     this.setupEventListeners();
     this.handleResize();
+    
+    // Play the Intro Sequence
+    this.playIntroSequence();
     
     // Start Loop
     requestAnimationFrame(this.gameLoop.bind(this));
@@ -103,6 +113,10 @@ class Game {
     });
     
     // UI Buttons
+    document.getElementById('skip-intro-btn')?.addEventListener('click', () => {
+      this.showStartScreen();
+    });
+
     document.getElementById('start-btn')?.addEventListener('click', () => {
       this.startGame();
     });
@@ -119,12 +133,60 @@ class Game {
     this.canvas.height = this.height;
     
     // Place plate at center, near bottom
-    if (this.state === 'START' || this.state === 'GAME_OVER') {
+    if (this.state === 'START' || this.state === 'GAME_OVER' || this.state === 'INTRO') {
        this.plate.x = this.width / 2;
     }
     this.plate.y = this.height * 0.8;
   }
   
+  playIntroSequence() {
+    this.state = 'INTRO';
+    this.introScreen.classList.add('active');
+    this.startScreen.classList.remove('active');
+    
+    // Build Teyze Cards
+    TeyzeData.forEach((teyze, index) => {
+      // Define roles dynamically based on index matching original prompt
+      const roles = [
+        "Ana Karakter / Ev Sahibi",
+        "Müzmin Hastalık Hastası",
+        "Ekonomi ve Altın Uzmanı",
+        "Muhafazakar Mahalle Dedektifi",
+        "Övüngen Büyükanne"
+      ];
+      
+      const card = document.createElement('div');
+      card.className = 'intro-card';
+      card.innerHTML = `
+        <img class="intro-card-img" src="${teyze.base}" alt="${teyze.name}">
+        <h3>${teyze.name} Teyze</h3>
+        <p><strong>${roles[index]}</strong></p>
+      `;
+      this.introCardsContainer.appendChild(card);
+      
+      // Animate them in sequentially
+      const t = setTimeout(() => {
+        card.classList.add('visible');
+      }, 1500 + (index * 1200));
+      this.introTimeouts.push(t as unknown as number);
+    });
+    
+    // Auto proceed to START after everyone is introduced
+    const finalTimer = setTimeout(() => {
+      this.showStartScreen();
+    }, 1500 + (5 * 1200) + 3000);
+    this.introTimeouts.push(finalTimer as unknown as number);
+  }
+
+  showStartScreen() {
+    // Clear any pending intro timeouts if skipped
+    this.introTimeouts.forEach(t => clearTimeout(t));
+    
+    this.state = 'START';
+    this.introScreen.classList.remove('active');
+    this.startScreen.classList.add('active');
+  }
+
   startGame() {
     this.state = 'PLAYING';
     this.score = 0;
@@ -145,6 +207,10 @@ class Game {
   endGame() {
     this.state = 'GAME_OVER';
     this.socialSystem.clearPrompt();
+    
+    // If we drop the plate, a Teyze yells at us!
+    this.socialSystem.triggerPenalty();
+    
     this.gameOverScreen.classList.add('active');
     this.finalScoreEl.innerText = Math.floor(this.score).toString();
     this.customCursor.classList.remove('cursor-shaking');
@@ -290,7 +356,7 @@ class Game {
     // Clear canvas
     this.ctx.clearRect(0, 0, this.width, this.height);
     
-    if (this.state === 'START') return;
+    if (this.state === 'START' || this.state === 'INTRO') return;
     
     // Draw Attached Foods (under plate rim slightly)
     this.foods.forEach(f => {

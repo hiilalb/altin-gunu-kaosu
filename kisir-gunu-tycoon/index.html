@@ -27,31 +27,38 @@
 
             <!-- 5 Teyze Radar Faces -->
             <div id="teyze-radar">
-              <!-- Dynamically populated in JS, but visualized as 5 slots -->
               <div class="teyze-slot" id="t-0">
                 <div class="teyze-name">Nuran</div>
-                <div class="teyze-pic">👩</div>
+                <div class="teyze-pic"><img src="/images/nuran.png" alt="Nuran"></div>
                 <div class="teyze-symbol"></div>
               </div>
               <div class="teyze-slot" id="t-1">
-                <div class="teyze-name">Gülümser</div>
-                <div class="teyze-pic">👱‍♀️</div>
+                <div class="teyze-name">Şükran</div>
+                <div class="teyze-pic"><img src="/images/sukran.png" alt="Şükran"></div>
                 <div class="teyze-symbol"></div>
               </div>
               <div class="teyze-slot" id="t-2">
-                <div class="teyze-name">Saniye</div>
-                <div class="teyze-pic">👵</div>
+                <div class="teyze-name">Müjgan</div>
+                <div class="teyze-pic"><img src="/images/mujgan.png" alt="Müjgan"></div>
                 <div class="teyze-symbol"></div>
               </div>
               <div class="teyze-slot" id="t-3">
-                <div class="teyze-name">Mukaddes</div>
-                <div class="teyze-pic">🧕</div>
+                <div class="teyze-name">Nebahat</div>
+                <div class="teyze-pic"><img src="/images/nebahat.png" alt="Nebahat"></div>
                 <div class="teyze-symbol"></div>
               </div>
               <div class="teyze-slot" id="t-4">
-                <div class="teyze-name">Şermin</div>
-                <div class="teyze-pic">👧</div>
+                <div class="teyze-name">Füsun</div>
+                <div class="teyze-pic"><img src="/images/fusun.png" alt="Füsun"></div>
                 <div class="teyze-symbol"></div>
+              </div>
+            </div>
+            
+            <!-- Annoying Question Modal (Starts hidden via CSS opacity/scale) -->
+            <div id="annoying-question-modal">
+              <div class="question-content">
+                <img id="annoying-teyze-img" src="/images/nuran.png" alt="Angry Teyze">
+                <p id="annoying-question-text">Ne yapıyorsun sen?!</p>
               </div>
             </div>
             
@@ -68,7 +75,20 @@
           </div>
 
           <!-- Screens -->
-          <div id="start-screen" class="overlay-screen active">
+          <div id="intro-screen" class="overlay-screen active">
+            <div class="intro-background"></div>
+            <div class="intro-narrative">
+              <p>Sadece biraz kısır yemeye gelmiştin...</p>
+              <p>Ama kendini TA3 otobüsüyle geldiğin Antebia Sitesi'ndeki Altın Günü Kaosu'nda buldun!</p>
+              <p>Görevin: Tabağı dökmemek ve darlayıcı sorulardan kaçmak.</p>
+            </div>
+            <div id="intro-cards-container">
+              <!-- JS animates cards here -->
+            </div>
+            <button id="skip-intro-btn" class="nuran-btn">Geç (Skip)</button>
+          </div>
+
+          <div id="start-screen" class="overlay-screen">
             <h1>Altın Günü Kaosu</h1>
             <p>Ağırlık merkezini koru, dedikoduları doğru hedefe ateşle!</p>
             <div class="instructions">

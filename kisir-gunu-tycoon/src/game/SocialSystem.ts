@@ -1,4 +1,12 @@
 // SocialSystem.ts - Overhauled 5-Teyze Radar system
+export const TeyzeData = [
+  { name: 'Nuran', base: '/images/nuran.png', shocked: '/images/nuran_shocked.png', penalty: 'Ne yapıyorsun sen, dökme o kısırı!' },
+  { name: 'Şükran', base: '/images/sukran.png', shocked: '/images/sukran_shocked.png', penalty: 'Benim tansiyonum fırladı, biraz dikkat et!' },
+  { name: 'Müjgan', base: '/images/mujgan.png', shocked: '/images/mujgan_shocked.png', penalty: 'Altın düşüyor, sen daha bir tabağı tutamıyorsun!' },
+  { name: 'Nebahat', base: '/images/nebahat.png', shocked: '/images/nebahat_shocked.png', penalty: 'Evlenmedin mi hala sen? Ne bu sakarlık!' },
+  { name: 'Füsun', base: '/images/fusun.png', shocked: '/images/fusun_shocked.png', penalty: 'Benim torun takdir aldı, sen şurada duramıyorsun!' }
+];
+
 export interface Teyze {
   id: number;
   element: HTMLElement;
@@ -160,17 +168,56 @@ export class SocialSystem {
       
       // Flash the target element when hit
       setTimeout(() => {
-        targetEl.style.transform = 'scale(1.2)';
-        targetEl.style.borderColor = isSuccess ? '#4caf50' : '#d32f2f';
-        
-        setTimeout(() => {
-          targetEl.style.transform = '';
-          targetEl.style.borderColor = '';
-        }, 200);
+        if (isSuccess) {
+          // Success Reaction
+          targetEl.classList.add('teyze-reaction-success');
+          const tData = TeyzeData[targetEl.id.split('-')[1] as unknown as number];
+          const img = targetEl.querySelector('.teyze-pic img') as HTMLImageElement;
+          img.src = tData.shocked;
+          
+          setTimeout(() => {
+            targetEl.classList.remove('teyze-reaction-success');
+            img.src = tData.base;
+          }, 2000); // 2 second shocked face
+
+        } else {
+          // Fail Reaction
+          targetEl.classList.add('teyze-reaction-fail');
+          this.triggerPenalty(parseInt(targetEl.id.split('-')[1]));
+          
+          setTimeout(() => {
+            targetEl.classList.remove('teyze-reaction-fail');
+          }, 500);
+        }
         
         particle.remove();
       }, 400);
     });
+  }
+
+  triggerPenalty(teyzeIndex?: number) {
+    if (this.isChaosMode) return; // Don't annoy in chaos mode
+    
+    // Pick random Teyze if not explicitly targeted
+    const tIdx = teyzeIndex ?? Math.floor(Math.random() * 5);
+    const data = TeyzeData[tIdx];
+    
+    const modal = document.getElementById('annoying-question-modal');
+    if (!modal) return;
+    
+    // Set content
+    const imgEl = document.getElementById('annoying-teyze-img') as HTMLImageElement;
+    imgEl.src = data.base;
+    const txtEl = document.getElementById('annoying-question-text');
+    if (txtEl) txtEl.innerText = `"${data.penalty}"`;
+    
+    // Show modal
+    modal.classList.add('show');
+    
+    // Hide after 3 seconds
+    setTimeout(() => {
+      modal.classList.remove('show');
+    }, 2500);
   }
 
   clearPrompt() {
